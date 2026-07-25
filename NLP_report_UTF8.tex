@@ -200,6 +200,66 @@ top = scores.topk(k=min(top_k, len(eligible_indices)))
 Top-3正解率，各入力の期待カテゴリと予測カテゴリを表示する。
 これにより，推薦結果を目視するだけでなく，同じ条件で繰り返し比較できる。
 
+\subsection{実行結果の例}
+用途文に「モンハンをWQHDの高画質かつ快適に遊びたい」，
+予算に30万円，表示候補数に3件を指定した実行画面を
+図\ref{fig:recommendation-result}に示す。
+画面上では，入力欄と検索条件に続けて，類似度が最も高い候補の
+部品構成，概算価格，推薦理由，予算残額が一つのカードにまとめられている。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\textwidth]{figures/recommendation_result.png}
+  \caption{PC構成推薦の実行画面（入力条件と第1候補）}
+  \label{fig:recommendation-result}
+\end{figure}
+
+図\ref{fig:recommendation-result-continued}は同じ検索結果の続きであり，
+第2候補と第3候補の構成を示している。
+利用者は画面をスクロールすることで，上位候補の部品構成と価格を
+同じ形式で比較できる。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\textwidth]
+    {figures/recommendation_result_continued.png}
+  \caption{PC構成推薦の実行画面（第2候補と第3候補）}
+  \label{fig:recommendation-result-continued}
+\end{figure}
+
+このときの上位3候補を表\ref{tab:recommendation-example}に示す。
+1位は「WQHDゲーム」で，類似度は0.765であった。
+入力文に含まれる「モンハン」，「WQHD」，「高画質」という特徴が，
+登録用途の「WQHDでモンハンやAAAゲームを高画質で遊びたい」と
+意味的に強く対応した結果である。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実行画面における上位3候補}
+  \label{tab:recommendation-example}
+  \begin{tabular}{clclrr}
+    \toprule
+    順位 & カテゴリ & 類似度 & 主な構成 & 価格 & 予算残額\\
+    \midrule
+    1 & WQHDゲーム & 0.765 & Ryzen 7 9700X / RTX 5070 Ti
+      & 260,000円 & 40,000円\\
+    2 & 低予算eスポーツ & 0.580 & Ryzen 5 7500F / RTX 4060
+      & 140,000円 & 160,000円\\
+    3 & WQHD高fps & 0.534 & Ryzen 7 9800X3D / RTX 5070 Ti
+      & 280,000円 & 20,000円\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+1位の候補は用途との対応が明確であり，予算条件も満たした。
+一方，2位には「低予算eスポーツ」が選ばれた。
+これはゲーム用途という共通性を捉えたものの，WQHD高画質という要求への
+適合度は低い。3位の「WQHD高fps」は解像度の要求には合うが，
+高画質よりフレームレートを重視する登録文であるため，1位より低くなった。
+この例から，SBERTは用途の意味を反映して順位付けできる一方，
+類似度だけでは画質，解像度，フレームレートなどの個別条件を
+常に厳密に制約できるわけではないことが分かる。
+
 \subsection{評価方法}
 CSVの用途文をそのまま入力すると評価が過度に容易になるため，
 意味を保った言い換え文を10件用意した。

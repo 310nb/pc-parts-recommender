@@ -1,0 +1,27 @@
+﻿use_case,price_yen,cpu,gpu,ram,ssd,psu,category,reason
+低予算でVALORANTやLoLをフルHDで遊びたい,140000,Ryzen 5 7500F,GeForce RTX 4060,16GB,1TB,650W,低予算eスポーツ,軽量な競技ゲーム向け。
+予算を抑えてAPEXをフルHDで快適に遊びたい,170000,Ryzen 5 7600,GeForce RTX 4060 Ti,32GB,1TB,650W,低予算FPS,フルHD高fpsを狙う構成。
+VALORANTを240fpsで遊びたい,210000,Ryzen 7 7800X3D,GeForce RTX 4070,32GB,1TB,750W,競技FPS,高fpsではCPU性能を重視。
+APEXやFortniteを高リフレッシュレートで遊びたい,230000,Ryzen 7 9700X,GeForce RTX 5070,32GB,1TB,750W,競技FPS,フルHDからWQHDの高fps向け。
+WQHDでモンハンやAAAゲームを高画質で遊びたい,260000,Ryzen 7 9700X,GeForce RTX 5070 Ti,32GB,2TB,850W,WQHDゲーム,GPU性能を重視したWQHD向け。
+WQHDで144fpsを目指したい,280000,Ryzen 7 9800X3D,GeForce RTX 5070 Ti,32GB,2TB,850W,WQHD高fps,CPUとGPUの両方に余裕を持たせる。
+4Kで重いゲームを高画質で遊びたい,360000,Ryzen 7 9800X3D,GeForce RTX 5080,32GB,2TB,1000W,4Kゲーム,4KではGPU性能を優先。
+最高性能のゲーミングPCが欲しい,600000,Ryzen 9 9950X3D,GeForce RTX 5090,64GB,4TB,1200W,ハイエンド,性能最優先の構成。
+ゲーム配信をしながらFPSを遊びたい,290000,Ryzen 9 9900X,GeForce RTX 5070 Ti,32GB,2TB,850W,ゲーム配信,配信とゲームを同時に行うためCPUに余裕を持たせる。
+Twitch配信をしながら4Kゲームをしたい,400000,Ryzen 9 9950X,GeForce RTX 5080,64GB,2TB,1000W,4K配信,ゲーム・配信・録画を同時に扱う構成。
+ゲームと動画編集を両方したい,300000,Ryzen 9 9900X,GeForce RTX 5070 Ti,64GB,2TB,850W,ゲーム＋動画編集,マルチコア性能とGPU性能のバランス。
+Premiere Proで動画編集したい,260000,Core Ultra 7 265K,GeForce RTX 5070,64GB,2TB,850W,動画編集,編集作業向けにメモリを多めにする。
+4K動画編集を快適にしたい,380000,Ryzen 9 9950X,GeForce RTX 5080,64GB,4TB,1000W,4K動画編集,高解像度素材向け。
+Blenderで3Dレンダリングしたい,390000,Ryzen 9 9950X,GeForce RTX 5080,64GB,2TB,1000W,3D制作,GPUレンダリングとCPU処理の両方を考慮。
+Stable DiffusionでAI画像生成をしたい,350000,Ryzen 9 9900X,GeForce RTX 5080,64GB,2TB,1000W,生成AI,GPU性能とVRAMを重視。
+機械学習の勉強をローカルでしたい,310000,Ryzen 9 9900X,GeForce RTX 5070 Ti,64GB,2TB,850W,AI学習,学習用GPUと十分なRAMを確保。
+UnityやUnreal Engineでゲーム開発したい,320000,Ryzen 9 9900X,GeForce RTX 5070 Ti,64GB,2TB,850W,ゲーム開発,ビルドと3Dプレビューを両立。
+Minecraftを影MODありで遊びたい,220000,Ryzen 7 9700X,GeForce RTX 5070,32GB,2TB,750W,MODゲーム,影MODや大規模MODを考慮。
+Cities Skylinesのようなシミュレーションゲームをしたい,270000,Ryzen 7 9800X3D,GeForce RTX 5070,32GB,2TB,750W,シミュレーション,CPU負荷が高いゲーム向け。
+VRゲームを快適に遊びたい,300000,Ryzen 7 9800X3D,GeForce RTX 5070 Ti,32GB,2TB,850W,VRゲーム,安定した高fpsを重視。
+大学の課題と軽いゲームを両方したい,160000,Ryzen 5 7600,GeForce RTX 4060,32GB,1TB,650W,学生向け,学習用途と軽いゲームの両立。
+写真編集とゲームをしたい,240000,Ryzen 7 9700X,GeForce RTX 5070,32GB,2TB,750W,写真編集＋ゲーム,一般的な制作作業とゲーム向け。
+省電力で静かなゲーミングPCが欲しい,210000,Ryzen 5 9600X,GeForce RTX 5060 Ti,32GB,1TB,650W,省電力ゲーム,発熱と消費電力を抑えた構成。
+将来も長く使えるゲームPCが欲しい,320000,Ryzen 7 9800X3D,GeForce RTX 5070 Ti,32GB,2TB,850W,長期利用,性能に余裕を持たせた構成。
+バトルロイヤル系のFPSを高fpsでプレイしたい,220000,Ryzen 7 7800X3D,GeForce RTX 4070,32GB,1TB,750W,競技FPS,高リフレッシュレート向けの構成。
+対戦型シューティングゲームを滑らかに遊びたい,210000,Ryzen 7 7800X3D,GeForce RTX 4070,32GB,1TB,750W,競技FPS,フレームレートを重視した構成。

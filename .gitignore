@@ -4,3 +4,7 @@ __pycache__/
 venv/
 env/
 .streamlit/
+.tools/
+*.aux
+*.log
+*.out

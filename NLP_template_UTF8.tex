@@ -1,0 +1,128 @@
+%ほとんどの場合はこちら
+\documentclass[a4j]{jsarticle}
+%uplatexを明示的に使うなら以下
+%\documentclass[uplatex, a4j]{jsarticle}
+
+%%%%%% 利用するパッケージ一覧 %%%%%%
+%必要があれば追加すること
+%% itembox環境，screen環境の利用
+\usepackage{ascmac}
+%% 高度な数式，記号の利用。
+\usepackage{amsmath,amssymb}
+%% ベクトル用の太字フォントの利用
+\usepackage{bm}
+%% 図の貼り込みサポート
+\usepackage[dvipdfmx]{graphicx}
+%% urlの表記サポート
+\usepackage{url}
+%%%
+
+%%%%%% maketitle の情報 %%%%%%
+%具体的なタイトに変更しない場合は減点対象
+\title{情報学応用演習A NLP課題レポート(\LaTeX{})}
+
+\author{学籍番号 *********，室蘭 太郎}
+%下記は\date{\today}とするとコンパイルした日になる
+%\date{2022年4月14日}
+\date{\today}
+
+%%%%%% 本文の開始 %%%%%%
+\begin{document}
+\maketitle
+
+%%%%%% 指定section 1  %%%%%%
+\section{課題設定} 
+
+%subsectionの例
+\subsection{課題の説明}
+本演習の教科書は文献\cite{DNNtext}であり，自然言語処理の実装について解説されている。
+また，参考書は文献\cite{NLPtext}であり，Word2Vec\cite{Word2Vec}から大規模言語モデル（Large Language Model; LLM）まで説明されている。
+このテンプレートの\verb|\section{}|は指定だが，\verb|\subsection{}|はあくまで例なので各課題に合わせて適切に変更・追記などすること。
+
+%%%%%% 指定section 2  %%%%%%
+\section{技術概要}
+
+%%%%%% 指定section 3  %%%%%%
+\section{システムの設計}
+
+%%%%%% 指定section 4  %%%%%%
+\section{プロトタイプの実装}
+
+\subsection{図表について}
+評価結果を表でまとめる際は，表が本文に対して大きすぎることがない様に作成する。
+複雑な罫線構造などはTable Generatorを使うと良い\cite{{table}}。
+図を掲載する場合は，出力そのままではなく，論文用の参考サイトを参考に図のアスペクト比やラベルを調整する。
+一例として\cite{figure1, figure2}を参考にすると良い。
+
+%%%%%% 指定section 5  %%%%%%
+\section{最終的なシステムの考察}
+
+%subsectionの例
+\subsection{まとめ}
+このファイルは\LaTeX{}を使ったレポートの例であり，指定の\verb|\section{}|について記載されていた。
+
+%%%%%% 参考文献  %%%%%%
+\begin{thebibliography}{99} 
+\bibitem{DNNtext}
+吉崎 亮介, 祖父江 誠人, ``ディープラーニング実装入門 PyTorchによる画像・自然言語処理,'' インプレスブックス，2020.
+\bibitem{NLPtext}
+室蘭工業大学現代情報学研究会(著), ``現代社会と情報システム 第2版,'' 朝倉書店, 2025.
+\bibitem{Word2Vec}
+Mikolov, Tomas, Sutskever, Ilya, Chen, Kai, Corrado, Greg, and Dean, Jeffrey.
+``Distributed Representations of Words and Phrases and their Compositionality,'' In Advances in Neural Information Processing Systems 26 (NeurIPS 2013), pp.~3111\textendash3119, 2013.
+\bibitem{table}
+Tables Generator, \url{https://www.tablesgenerator.com/}
+\bibitem{figure1}
+``【Python】matplotlibで論文に使えるきれいなグラフを作る,'' \url{https://qiita.com/yuki_2020/items/7f96c79614c2576a37d3}
+\bibitem{figure2}
+``Matplotlibで綺麗な論文用のグラフを作る,'' \url{https://qiita.com/MENDY/items/fe9b0c50383d8b2fd919}
+\end{thebibliography}
+
+%%%%%% 付録 %%%%%%
+\appendix
+
+% これ以降appendixのsectionになるので参考にすること
+
+\section{LLMの利用記録}
+
+\section{ソースコード}
+プロトタイプのソースコードを以下に示す。
+%%%%%%% 以下は付録でソースコードを掲載する際の例 %%%%%%
+\begin{screen}
+\begin{verbatim}
+# MeCabによる「分かち書き」の出力サンプル
+import MeCab
+import ipadic
+
+# MeCabの初期設定: 辞書のパスを指定（/dev/nullでmecabrc読込を回避）
+args = f'-Owakati -r /dev/null -d "{ipadic.DICDIR}"'
+mecab = MeCab.Tagger(args)
+
+# 解析するテキスト
+input_text = 'この授業科目名は情報学応用演習Bです。'
+print(f'[0] Input text: {input_text}')
+
+# わかち書きテキスト（末尾の改行をstripで除去）
+wakati_text = mecab.parse(input_text).strip()
+print(f'[1] Owakati text: {wakati_text}')
+
+# 分割（空白区切り）してトークンリストを得る
+tokens = wakati_text.split()
+print(f'[2] Token list: {tokens}')
+\end{verbatim}
+\end{screen}
+%%%%%% ソースコード掲載例ここまで %%%%%%
+
+\section{評価結果の生データ}
+プロトタイプの実行結果を以下に示す。
+%%%%%%% 以下は付録でターミナル表示内容を掲載する例 %%%%%%
+\begin{screen}
+\begin{verbatim}
+[0] Input text: この授業科目名は情報学応用演習Bです。
+[1] Owakati text: この 授業 科目 名 は 情報 学 応用 演習 B です 。
+[2] Token list: ['この', '授業', '科目', '名', 'は', '情報', '学', '応用', '演習', 'B', 'です', '。']
+\end{verbatim}
+\end{screen}
+%%%%%% ターミナル表示内容例ここまで %%%%%%
+
+\end{document}

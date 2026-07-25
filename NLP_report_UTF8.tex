@@ -1,0 +1,375 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{ascmac}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[margin=25mm]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont{Yu Mincho}
+\setCJKsansfont{Yu Gothic}
+\setCJKmonofont{MS Gothic}
+\XeTeXlinebreaklocale "ja"
+\XeTeXlinebreakskip=0pt plus 1pt
+\setlength{\parindent}{1em}
+\renewcommand{\today}{\number\year 年\number\month 月\number\day 日}
+
+\title{Sentence-BERTを用いた用途・予算別PC構成推薦システム}
+\author{学籍番号 24026111，氏名 佐藤 信晃}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{課題設定}
+
+\subsection{背景と解決する問題}
+PCを購入する際には，CPU，GPU，メモリ，ストレージ，電源容量など，
+多数の部品を用途に応じて選ぶ必要がある。
+しかし，初心者が「WQHDでゲームを快適に遊びたい」などの要求を持っていても，
+個々の部品名から適切な構成を判断することは難しい。
+また，同じ用途でも「動画制作」と「YouTube用の映像編集」のように表現が異なるため，
+単純な文字列一致だけでは要求に近い構成を検索できない場合がある。
+
+そこで本課題では，利用者が自然文で入力した用途と予算から，
+意味の近いPC構成を推薦するプロトタイプを実装した。
+自然文の意味的な近さを扱うため，Sentence-BERT（SBERT）による
+文章埋め込みを中核技術として使用する。
+
+\subsection{対象ユーザと要求}
+対象ユーザは，PC部品について詳しくない学生，ゲーマー，動画制作者などである。
+主な要求を以下に示す。
+
+\begin{itemize}
+  \item 専門用語を使わず，自然文で用途を入力できる。
+  \item 指定した予算を超えない構成だけを比較できる。
+  \item 推薦されたCPU，GPU，RAMなどを一覧で確認できる。
+  \item 推薦理由と入力文に対する類似度を確認できる。
+\end{itemize}
+
+\subsection{想定ユースケース}
+利用者はWeb画面に「Apexを高フレームレートで遊びたい」と入力し，
+予算を22万円に設定する。
+システムは予算内の候補だけを抽出し，入力文と各候補の登録用途との
+意味的類似度を計算する。
+そして，類似度の高い順にPC構成，概算価格，推薦理由，予算残額を表示する。
+例えば，この入力では競技FPS向けの構成が上位になることを期待する。
+
+
+\section{技術概要}
+
+\subsection{Sentence-BERT}
+BERTを用いて文の類似度を求める単純な方法では，文の組を一つずつモデルへ
+入力する必要があり，多数の候補との比較には計算量が大きい。
+Sentence-BERTはSiamese Network構造を用いて，各文を固定長ベクトルへ
+変換し，ベクトル間の距離によって文の意味的類似度を高速に計算できるようにした
+手法である\cite{SBERT}。
+
+本システムでは，日本語を含む50以上の言語を扱い，文や短い段落を
+384次元のベクトルへ写像する
+\verb|paraphrase-multilingual-MiniLM-L12-v2|を使用した\cite{ModelCard}。
+PC用途の登録文と利用者の入力文は，それぞれ同じ埋め込み空間のベクトルへ
+変換される。
+
+\subsection{コサイン類似度}
+入力文の埋め込みを$\bm{q}$，候補文の埋め込みを$\bm{d}$とすると，
+コサイン類似度は式(\ref{eq:cos})で定義される。
+
+\begin{equation}
+  \mathrm{sim}(\bm{q},\bm{d})
+  = \frac{\bm{q}\cdot\bm{d}}
+  {\|\bm{q}\|_2\|\bm{d}\|_2}
+  \label{eq:cos}
+\end{equation}
+
+値が大きい候補ほど，入力文と意味的に近いと判断する。
+実装では埋め込み生成時にL2正規化を行った後，
+\verb|sentence_transformers.util.cos_sim|を用いて類似度を計算した。
+Sentence Transformersの公式文書でも，文埋め込み同士の意味的類似度の
+算出方法としてコサイン類似度が示されている\cite{STSDoc}。
+
+\subsection{推薦用コーパス}
+推薦用コーパスはCSV形式で独自に作成した26件のPC構成である。
+各行は用途文，概算価格，CPU，GPU，RAM，SSD，電源，カテゴリ，
+推薦理由を持つ。
+ゲーム，配信，動画編集，3D制作，画像生成AI，機械学習，学生向けなど，
+異なる目的を含めた。
+
+本プロトタイプの目的は市場価格を厳密に見積もることではなく，
+文章埋め込みによる意味検索の動作を検証することである。
+したがって，価格と部品構成は固定した検証用データであり，
+実店舗の在庫や価格を外部APIから取得していない。
+
+
+\section{システムの設計}
+
+\subsection{入出力}
+入力は用途を表す自然文，予算，表示候補数の三つである。
+予算は14万円から60万円，候補数は1件，3件，5件から指定できる。
+出力は類似度順のPC構成であり，各候補についてカテゴリ，登録用途，
+CPU，GPU，RAM，SSD，電源，概算価格，推薦理由，予算残額を表示する。
+
+\subsection{処理フロー}
+システム全体の処理フローを図\ref{fig:flow}に示す。
+
+\begin{figure}[htbp]
+  \centering
+  \setlength{\fboxsep}{6pt}
+  \begin{tabular}{c}
+    \fbox{利用者が用途文・予算・候補数を入力}\\
+    $\downarrow$\\
+    \fbox{CSVを読み込み，予算以下の候補を抽出}\\
+    $\downarrow$\\
+    \fbox{SBERTで入力文を384次元ベクトルへ変換}\\
+    $\downarrow$\\
+    \fbox{候補ベクトルとのコサイン類似度を計算}\\
+    $\downarrow$\\
+    \fbox{上位$k$件のPC構成と推薦理由を表示}
+  \end{tabular}
+  \caption{PC構成推薦システムの処理フロー}
+  \label{fig:flow}
+\end{figure}
+
+\subsection{モジュール構成}
+プロトタイプはPythonとStreamlitで実装した。
+主な関数を表\ref{tab:functions}に示す。
+
+\begin{table}[htbp]
+  \centering
+  \caption{主な関数と役割}
+  \label{tab:functions}
+  \begin{tabular}{ll}
+    \toprule
+    関数 & 役割\\
+    \midrule
+    \verb|load_data| & CSVの読込みと必須列の検証\\
+    \verb|load_model| & Sentence-BERTモデルの読込み\\
+    \verb|load_corpus_embeddings| & 全候補文の事前ベクトル化\\
+    \verb|recommend| & 予算抽出，類似度計算，上位候補の生成\\
+    \verb|evaluate| & 固定した10件によるTop-$k$評価\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{キャッシュ設計}
+モデルの読込みと全文の埋め込み計算を検索のたびに行うと応答が遅くなる。
+そこで，モデルとコーパス埋め込みには
+\verb|st.cache_resource|を適用した。
+CSV読込みには\verb|st.cache_data|を適用した。
+初回検索ではモデル読込みが必要だが，2回目以降は入力文だけを
+ベクトル化すればよい。
+
+
+\section{プロトタイプの実装}
+
+\subsection{推薦処理}
+推薦処理では，最初に空文字，予算，候補数を検証する。
+次に，CSVの全候補から概算価格が予算以下の行番号だけを取得する。
+入力文を正規化済みベクトルに変換し，対象候補のベクトルとの
+コサイン類似度を一括計算する。
+最後に\verb|topk|で上位候補を選び，類似度と予算残額を付加して返す。
+中核部分を以下に示す。
+
+\begin{screen}
+\begin{verbatim}
+query_embedding = model.encode(
+    query,
+    convert_to_tensor=True,
+    normalize_embeddings=True,
+)
+eligible_embeddings = corpus_embeddings[eligible_indices]
+scores = util.cos_sim(query_embedding,
+                      eligible_embeddings)[0]
+top = scores.topk(k=min(top_k, len(eligible_indices)))
+\end{verbatim}
+\end{screen}
+
+\subsection{ユーザインタフェース}
+画面は「構成を検索」と「性能評価」の二つのタブで構成した。
+検索タブでは，自然文入力，予算スライダー，候補数選択を一つの画面に配置した。
+結果は候補ごとの枠に分け，部品名と概算価格を表示する。
+類似度だけでなく，登録用途と推薦理由も表示することで，
+利用者が推薦結果を解釈しやすいようにした。
+
+性能評価タブでは，ボタン一つで10件を評価し，Top-1正解率，
+Top-3正解率，各入力の期待カテゴリと予測カテゴリを表示する。
+これにより，推薦結果を目視するだけでなく，同じ条件で繰り返し比較できる。
+
+\subsection{評価方法}
+CSVの用途文をそのまま入力すると評価が過度に容易になるため，
+意味を保った言い換え文を10件用意した。
+各入力には，正解と期待するカテゴリと，そのカテゴリの構成が含まれる予算を設定した。
+
+評価指標はTop-1正解率とTop-3正解率である。
+テスト数を$N$，正解カテゴリを$y_i$，上位$k$件のカテゴリ集合を
+$P_i^{(k)}$とすると，Top-$k$正解率を式(\ref{eq:topk})で求める。
+
+\begin{equation}
+  \mathrm{Accuracy@}k =
+  \frac{1}{N}\sum_{i=1}^{N}
+  \mathbf{1}\left[y_i \in P_i^{(k)}\right]
+  \label{eq:topk}
+\end{equation}
+
+\subsection{評価結果}
+評価結果を表\ref{tab:result}に示す。
+
+\begin{table}[htbp]
+  \centering
+  \caption{言い換え入力10件に対する評価結果}
+  \label{tab:result}
+  \begin{tabular}{lcc}
+    \toprule
+    指標 & 正解数 & 正解率\\
+    \midrule
+    Top-1 & 10/10 & 100.0\%\\
+    Top-3 & 10/10 & 100.0\%\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+例えば「WQHDでゲームを快適に遊びたい」，予算28万円という入力に対し，
+1位は「WQHDゲーム」で，コサイン類似度は0.883であった。
+2位は「競技FPS」で0.741，3位は「低予算eスポーツ」で0.634であり，
+用途の意味に対応した順位となった。
+
+全10件で正解したことから，今回用意した用途の範囲では，
+登録文と完全一致しない入力でも意味的に近い構成を取得できた。
+一方，評価データは開発者が作成した10件のみであり，
+未知の利用者による評価ではない。
+したがって，100\%という値を一般的な推薦性能として解釈することはできない。
+
+
+\section{最終的なシステムの考察}
+
+\subsection{期待される成果}
+完成形では，利用者が部品名を知らなくても，用途と予算だけで
+比較の出発点となるPC構成を得られる。
+キーワード一致ではなく文章埋め込みを使用するため，
+「動画編集」と「YouTube用の映像制作」のような言い換えにも対応できる。
+また，外部の生成AI APIに依存せず，ローカルで同じ入力に対して
+再現可能な類似度を計算できる。
+
+\subsection{問題点}
+第一に，コーパスが26件と小さく，候補に存在しない用途や複合的な要求には弱い。
+類似度は文章同士の意味の近さを表すが，PC部品間の互換性や，
+実際のフレームレートを保証する値ではない。
+
+第二に，価格を固定値としているため，市場価格の変動や在庫を反映できない。
+また，「静音」「省電力」などを入力しても，候補文の情報だけで順位が決まり，
+消費電力や騒音の実測値を用いた制約判定は行っていない。
+
+第三に，評価用入力と期待カテゴリを開発者が作成している。
+同じ人物がコーパスと評価データを作ることで，表現やカテゴリに偏りが入る。
+実利用者が自由に入力する場合の誤記，長文，曖昧な要求については
+追加検証が必要である。
+
+\subsection{改善案}
+今後は用途文と構成を増やし，複数人が作成した評価データを
+訓練・調整用と最終評価用に分離する。
+価格，消費電力，GPUメモリ，筐体サイズなどは文章類似度とは別の
+構造化条件として扱う。
+類似度が低い場合には無理に推薦せず，追加質問や「該当候補なし」を
+提示する閾値も必要である。
+
+さらに，SBERTによる検索結果を第一段階の候補抽出とし，
+第二段階で部品互換性と定量条件を規則ベースで検証する構成が考えられる。
+この二段階構成により，文章の柔軟な検索能力と，PC構成に必要な
+厳密な制約判定を両立できる。
+
+\subsection{まとめ}
+本課題では，多言語Sentence-BERTを用いて，利用者の用途文と
+PC構成の登録用途を384次元の文章埋め込みへ変換し，
+コサイン類似度と予算条件から候補を推薦するプロトタイプを実装した。
+固定した言い換え入力10件ではTop-1，Top-3ともに100\%となり，
+小規模な対象範囲で意味検索が機能することを確認した。
+今後はコーパスと独立評価データの拡充，価格情報の更新，
+部品互換性の検証を追加する必要がある。
+
+
+\begin{thebibliography}{99}
+\bibitem{SBERT}
+N. Reimers and I. Gurevych,
+``Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks,''
+Proceedings of EMNLP-IJCNLP 2019, pp.~3982--3992, 2019.
+\url{https://arxiv.org/abs/1908.10084}
+
+\bibitem{ModelCard}
+Sentence Transformers,
+``paraphrase-multilingual-MiniLM-L12-v2 Model Card,''
+\url{https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2},
+閲覧日：2026年7月25日.
+
+\bibitem{STSDoc}
+Sentence Transformers,
+``Semantic Textual Similarity,''
+\url{https://sbert.net/docs/sentence_transformer/usage/semantic_textual_similarity.html},
+閲覧日：2026年7月25日.
+
+\bibitem{Streamlit}
+Streamlit,
+``Streamlit documentation,''
+\url{https://docs.streamlit.io/},
+閲覧日：2026年7月25日.
+\end{thebibliography}
+
+
+\appendix
+
+\section{LLMの利用記録}
+本課題では，LLMを以下の目的で利用した。
+\begin{itemize}
+  \item 課題文の要件整理と，既存プロトタイプとの差分確認
+  \item 文字化けおよびPython構文エラーの修正
+  \item 入力検証，キャッシュ，性能評価処理の実装支援
+  \item 本文構成と表現の推敲
+\end{itemize}
+
+主な指示は「NLPreport.mdの要件に沿って，既存のPCパーツ推薦
+プロトタイプを完成させること」であった。
+LLMの出力はそのまま採用せず，Pythonの構文検査，依存ライブラリの
+インポート，Sentence-BERTによる実検索，10件の一括評価を実行して確認した。
+実際の対話全文および詳細なプロンプトは，提出時に別の付帯PDFへ収録する。
+
+\section{ソースコード}
+ソースコード全文は付帯資料とし，本節では主要ファイルのみを示す。
+\begin{itemize}
+  \item \verb|app.py|：Streamlit画面，推薦処理，評価処理
+  \item \verb|pc_builds.csv|：26件のPC構成コーパス
+  \item \verb|requirements.txt|：実行に必要なライブラリ
+\end{itemize}
+
+実行コマンドは以下である。
+\begin{screen}
+\begin{verbatim}
+.\venv\Scripts\python.exe -m streamlit run app.py \
+  --server.fileWatcherType none
+\end{verbatim}
+\end{screen}
+
+\section{評価結果の生データ}
+\begin{center}
+\begin{tabular}{rlll}
+  \toprule
+  No. & 期待カテゴリ & 1位カテゴリ & Top-3\\
+  \midrule
+  1 & 競技FPS & 競技FPS & 正解\\
+  2 & ゲーム＋動画編集 & ゲーム＋動画編集 & 正解\\
+  3 & 生成AI & 生成AI & 正解\\
+  4 & WQHDゲーム & WQHDゲーム & 正解\\
+  5 & 4Kゲーム & 4Kゲーム & 正解\\
+  6 & ゲーム配信 & ゲーム配信 & 正解\\
+  7 & 3D制作 & 3D制作 & 正解\\
+  8 & 学生向け & 学生向け & 正解\\
+  9 & シミュレーション & シミュレーション & 正解\\
+  10 & VRゲーム & VRゲーム & 正解\\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

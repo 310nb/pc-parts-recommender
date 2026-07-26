@@ -1,0 +1,251 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{ascmac}
+\usepackage{booktabs}
+\usepackage[margin=25mm]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont{Yu Mincho}
+\setCJKsansfont{Yu Gothic}
+\setCJKmonofont{MS Gothic}
+\XeTeXlinebreaklocale "ja"
+\XeTeXlinebreakskip=0pt plus 1pt
+\setlength{\parindent}{1em}
+\renewcommand{\today}{\number\year 年\number\month 月\number\day 日}
+
+\title{Sentence-BERTを用いた用途・予算別PC構成推薦システム\\付録資料}
+\author{学籍番号 24026111，氏名 佐藤 信晃}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{LLMの利用記録}
+本課題では，LLMを以下の目的で利用した。
+\begin{itemize}
+  \item 課題文の要件整理と，既存プロトタイプとの差分確認
+  \item 文字化けおよびPython構文エラーの修正
+  \item 入力検証，キャッシュ，性能評価処理の実装支援
+  \item レポート本文の構成と表現の推敲
+\end{itemize}
+
+主な指示は「NLPreport.mdの要件に沿って，既存のPCパーツ推薦
+プロトタイプを完成させること」であった。
+LLMから得た提案はそのまま採用せず，Pythonの構文検査，
+依存ライブラリのインポート，Sentence-BERTによる実検索，
+10件の一括評価を実行して確認した。
+
+\subsection{対話記録}
+以下では，実際にLLMへ入力した指示を時系列で示す。
+短い指示だけでは作業内容が分かりにくいため，各指示に対する応答の要点，
+実際に採用した内容，確認方法も併記する。
+
+\subsubsection*{対話1：課題要件と既存実装の確認}
+\noindent
+\textbf{ユーザの指示（原文）}\\
+「NLPreport.md　これやってや」
+
+\noindent
+\textbf{LLMの応答・作業}\\
+課題文，既存の\verb|app.py|，\verb|pc_builds.csv|，
+\verb|requirements.txt|を読み，課題がSentence-BERTまたはgensimを
+必ず利用するNLPプロトタイプの設計・実装・評価であると整理した。
+既存コードは日本語の文字化けに加え，文字列の引用符が途中で失われており，
+Pythonとして実行できない状態であると指摘した。
+
+\noindent
+\textbf{採用内容と確認}\\
+PC構成推薦という題材は課題条件を満たすため維持し，
+文字化けしたUI文言と構文を修正した。
+\verb|python -m py_compile app.py|による構文検査と，
+Streamlit，pandas，sentence-transformers，torchのインポート確認を行った。
+
+\subsubsection*{対話2：システムのゴールの明確化}
+\noindent
+\textbf{ユーザの質問（原文）}\\
+「これのゴールは？」
+
+\noindent
+\textbf{LLMの応答}\\
+利用者が自然文でPC用途と予算を入力すると，Sentence-BERTで用途の意味を比較し，
+予算内のPC構成を推薦するシステムを完成形として説明した。
+また，プロトタイプの作成だけでなく，Top-1・Top-3正解率による評価と，
+指定形式の本文PDFおよび付録PDFが必要であると整理した。
+
+\noindent
+\textbf{採用内容}\\
+この説明を基に，実装では「構成を検索」と「性能評価」の二つの画面を用意し，
+レポートでは課題設定，技術概要，設計，実装，考察の順で説明することにした。
+
+\subsubsection*{対話3：推薦処理と評価処理の改善}
+\noindent
+\textbf{LLMの提案}\\
+検索のたびに全候補をベクトル化すると処理が重複するため，
+モデル，CSVデータ，全候補の埋め込みをキャッシュする構成が提案された。
+また，空の入力や予算内候補がない場合の処理，
+登録文をそのまま使わない10件の言い換え評価が追加された。
+
+\noindent
+\textbf{採用内容と確認}\\
+\verb|st.cache_resource|でモデルとコーパス埋め込みを，
+\verb|st.cache_data|でCSVをキャッシュした。
+Sentence-BERTモデルを実際に読み込み，
+「WQHDでゲームを快適に遊びたい」という入力に対して
+「WQHDゲーム」が類似度0.883で1位になることを確認した。
+さらに10件の一括評価を実行し，Top-1，Top-3ともに10/10件となった。
+
+\subsubsection*{対話4：レポートテンプレートへの適用}
+\noindent
+\textbf{ユーザの指示（原文）}\\
+「NLP\_template\_UTF8.tex　これレポートのテンプレ」
+
+\noindent
+\textbf{LLMの応答・作業}\\
+テンプレートの指定section名を変更しないという課題要件を確認し，
+「課題設定」「技術概要」「システムの設計」
+「プロトタイプの実装」「最終的なシステムの考察」の五章で本文を作成した。
+Sentence-BERTの仕組み，コサイン類似度の数式，処理フロー，
+関数構成，評価方法，制約と改善案を追加した。
+
+\noindent
+\textbf{確認}\\
+参考文献にはSentence-BERTの原論文，使用モデルのModel Card，
+Sentence Transformers公式文書を記載した。
+ソースコード全文を本文に載せず，推薦処理の中核部分だけを掲載した。
+
+\subsubsection*{対話5：LaTeXからPDFへの変換}
+\noindent
+\textbf{ユーザの指示（原文）}\\
+「このテフをpdfにして」
+
+\noindent
+\textbf{LLMの応答・作業}\\
+実行環境にpLaTeXがなかったため，Tectonicをプロジェクト内へ導入した。
+元テンプレートの\verb|jsarticle|と\verb|dvipdfmx|指定は
+TectonicのXeTeX処理に直接対応しなかったため，
+本文内容を維持したまま\verb|article|，\verb|xeCJK|，
+Windowsの日本語フォントを使う設定へ変更した。
+日付はテンプレートと同様に\verb|\date{\today}|を使い，
+「年・月・日」の日本語表記になるよう再定義した。
+
+\noindent
+\textbf{確認}\\
+コンパイル終了コード，PDFヘッダ，ファイル終端を確認し，
+正常なPDFファイルが生成されたことを確認した。
+
+\subsubsection*{対話6：実行画面と結果の追加}
+\noindent
+\textbf{ユーザの指示（原文）}\\
+「この実行結果もレポートに混ぜて」
+
+\noindent
+\textbf{LLMの応答・作業}\\
+利用者が用意した二枚の実行画面を本文の実装章へ掲載した。
+画面に表示された入力条件，三つの推薦候補，類似度，価格，予算残額を
+表として整理した。
+単に画像を貼るだけでなく，第1候補が入力用途と対応した理由，
+第2候補が低予算eスポーツとなったことから分かる意味検索の限界を考察した。
+
+\noindent
+\textbf{確認}\\
+画像をレポート用の英数字ファイル名で\verb|figures|ディレクトリへ保存し，
+本文から図番号で参照した後，PDFを再コンパイルした。
+
+\subsubsection*{対話7：本文PDFと付録PDFの分離}
+\noindent
+\textbf{ユーザの指示（原文）}\\
+「これ付録別ファイルだよ」
+
+\noindent
+\textbf{LLMの応答・作業}\\
+課題文では本文PDFと付録PDFを別ファイルで提出すると指定されていたため，
+本文末尾に含めていたLLM利用記録，ソースコード，評価結果の生データを削除し，
+新しい付録用TeXファイルへ移動した。
+
+\noindent
+\textbf{確認}\\
+本文PDFと付録PDFを個別にコンパイルし，
+本文側には指定された五章と参考文献だけが，
+付録側には補助資料だけが含まれることを確認した。
+
+\subsection{LLM出力の扱い}
+LLMの提案には，実装環境に存在しないコマンドや，
+LaTeX処理系によって利用できない設定が含まれる可能性がある。
+そのため，生成されたコードや文章を無条件には採用せず，
+エラーメッセージを確認して修正し，実行結果を根拠として採否を判断した。
+特に推薦精度100\%という結果については，評価数が10件と少なく，
+開発者が作成したデータであるため，一般的な精度を保証しないことを
+本文の考察に明記した。
+
+\section{ソースコード}
+作成したソースコードは次のファイルから構成される。
+\begin{itemize}
+  \item \verb|app.py|：Streamlit画面，推薦処理，評価処理
+  \item \verb|pc_builds.csv|：26件のPC構成コーパス
+  \item \verb|requirements.txt|：実行に必要なライブラリ
+\end{itemize}
+
+実行コマンドを以下に示す。
+\begin{screen}
+\begin{verbatim}
+.\venv\Scripts\python.exe -m streamlit run app.py \
+  --server.fileWatcherType none
+\end{verbatim}
+\end{screen}
+
+\subsection{推薦処理の主要部分}
+\begin{screen}
+\begin{verbatim}
+def recommend(query: str, budget: int, top_k: int = 3):
+    query = query.strip()
+    if not query or budget <= 0 or top_k <= 0:
+        return []
+
+    all_rows = load_data()
+    eligible_indices = [
+        index
+        for index, row in enumerate(all_rows)
+        if int(row["price_yen"]) <= budget
+    ]
+    if not eligible_indices:
+        return []
+
+    model = load_model()
+    corpus_embeddings = load_corpus_embeddings()
+    query_embedding = model.encode(
+        query,
+        convert_to_tensor=True,
+        normalize_embeddings=True,
+    )
+    eligible_embeddings = corpus_embeddings[eligible_indices]
+    scores = util.cos_sim(
+        query_embedding, eligible_embeddings
+    )[0]
+    top = scores.topk(
+        k=min(top_k, len(eligible_indices))
+    )
+\end{verbatim}
+\end{screen}
+
+\section{評価結果の生データ}
+\begin{center}
+\begin{tabular}{rlll}
+  \toprule
+  No. & 期待カテゴリ & 1位カテゴリ & Top-3\\
+  \midrule
+  1 & 競技FPS & 競技FPS & 正解\\
+  2 & ゲーム＋動画編集 & ゲーム＋動画編集 & 正解\\
+  3 & 生成AI & 生成AI & 正解\\
+  4 & WQHDゲーム & WQHDゲーム & 正解\\
+  5 & 4Kゲーム & 4Kゲーム & 正解\\
+  6 & ゲーム配信 & ゲーム配信 & 正解\\
+  7 & 3D制作 & 3D制作 & 正解\\
+  8 & 学生向け & 学生向け & 正解\\
+  9 & シミュレーション & シミュレーション & 正解\\
+  10 & VRゲーム & VRゲーム & 正解\\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

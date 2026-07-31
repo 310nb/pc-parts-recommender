@@ -37,14 +37,16 @@ LLMから得た提案はそのまま採用せず，Pythonの構文検査，
 10件の一括評価を実行して確認した。
 
 \subsection{対話記録}
-以下では，実際にLLMへ入力した指示を時系列で示す。
-短い指示だけでは作業内容が分かりにくいため，各指示に対する応答の要点，
-実際に採用した内容，確認方法も併記する。
+以下では，実際にLLMへ入力した指示の内容を時系列で示す。
+対話時の短い口語表現は，意図を変えない範囲でレポート用の文章に要約した。
+したがって，以下の記述は逐語的な対話ログではなく，指示内容の要約である。
+各指示に対する応答の要点，実際に採用した内容，確認方法も併記する。
 
 \subsubsection*{対話1：課題要件と既存実装の確認}
 \noindent
-\textbf{ユーザの指示（原文）}\\
-「NLPreport.md　これやってや」
+\textbf{ユーザの指示内容（要約）}\\
+「\verb|NLPreport.md|に記載された課題要件を確認し，
+既存のPCパーツ推薦システムを課題に適合するプロトタイプへ修正する。」
 
 \noindent
 \textbf{LLMの応答・作業}\\
@@ -63,8 +65,9 @@ Streamlit，pandas，sentence-transformers，torchのインポート確認を行
 
 \subsubsection*{対話2：システムのゴールの明確化}
 \noindent
-\textbf{ユーザの質問（原文）}\\
-「これのゴールは？」
+\textbf{ユーザの質問内容（要約）}\\
+「PC構成推薦システムの対象ユーザ，入出力，Sentence-BERTの利用箇所，
+および性能評価の方法を整理する。」
 
 \noindent
 \textbf{LLMの応答}\\
@@ -79,6 +82,11 @@ Streamlit，pandas，sentence-transformers，torchのインポート確認を行
 レポートでは課題設定，技術概要，設計，実装，考察の順で説明することにした。
 
 \subsubsection*{対話3：推薦処理と評価処理の改善}
+\noindent
+\textbf{ユーザの指示内容（要約）}\\
+「Sentence-BERTを利用した推薦処理を実装し，プロトタイプの性能を
+比較可能な指標で評価できるようにする。」
+
 \noindent
 \textbf{LLMの提案}\\
 検索のたびに全候補をベクトル化すると処理が重複するため，
@@ -97,8 +105,9 @@ Sentence-BERTモデルを実際に読み込み，
 
 \subsubsection*{対話4：レポートテンプレートへの適用}
 \noindent
-\textbf{ユーザの指示（原文）}\\
-「NLP\_template\_UTF8.tex　これレポートのテンプレ」
+\textbf{ユーザの指示内容（要約）}\\
+「\verb|NLP_template_UTF8.tex|をレポートのテンプレートとして使用し，
+実装内容と評価結果をレポート用の文章にまとめる。」
 
 \noindent
 \textbf{LLMの応答・作業}\\
@@ -116,8 +125,8 @@ Sentence Transformers公式文書を記載した。
 
 \subsubsection*{対話5：LaTeXからPDFへの変換}
 \noindent
-\textbf{ユーザの指示（原文）}\\
-「このテフをpdfにして」
+\textbf{ユーザの指示内容（要約）}\\
+「作成したLaTeX文書をコンパイルし，提出内容を確認できるPDFを生成する。」
 
 \noindent
 \textbf{LLMの応答・作業}\\
@@ -136,8 +145,9 @@ Windowsの日本語フォントを使う設定へ変更した。
 
 \subsubsection*{対話6：実行画面と結果の追加}
 \noindent
-\textbf{ユーザの指示（原文）}\\
-「この実行結果もレポートに混ぜて」
+\textbf{ユーザの指示内容（要約）}\\
+「プロトタイプの実行画面をレポートへ掲載し，表示された推薦結果を
+レポート用の文章と表で説明する。」
 
 \noindent
 \textbf{LLMの応答・作業}\\
@@ -154,8 +164,8 @@ Windowsの日本語フォントを使う設定へ変更した。
 
 \subsubsection*{対話7：本文PDFと付録PDFの分離}
 \noindent
-\textbf{ユーザの指示（原文）}\\
-「これ付録別ファイルだよ」
+\textbf{ユーザの指示内容（要約）}\\
+「課題の提出形式に従い，レポート本文と付録資料を別々のPDFファイルに分離する。」
 
 \noindent
 \textbf{LLMの応答・作業}\\

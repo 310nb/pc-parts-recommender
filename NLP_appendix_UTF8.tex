@@ -2,6 +2,7 @@
 
 \usepackage{ascmac}
 \usepackage{booktabs}
+\usepackage{fvextra}
 \usepackage[margin=25mm]{geometry}
 \usepackage{fontspec}
 \usepackage{xeCJK}
@@ -204,39 +205,18 @@ LaTeX処理系によって利用できない設定が含まれる可能性があ
 \end{verbatim}
 \end{screen}
 
-\subsection{推薦処理の主要部分}
-\begin{screen}
-\begin{verbatim}
-def recommend(query: str, budget: int, top_k: int = 3):
-    query = query.strip()
-    if not query or budget <= 0 or top_k <= 0:
-        return []
+\subsection{アプリケーションのソースコード全文}
+以下に\verb|app.py|の全文を示す。行番号は説明時の参照を容易にするため付加した。
+本文では推薦処理の中核だけを掲載し，完全な実装は本付録へ分離した。
 
-    all_rows = load_data()
-    eligible_indices = [
-        index
-        for index, row in enumerate(all_rows)
-        if int(row["price_yen"]) <= budget
-    ]
-    if not eligible_indices:
-        return []
-
-    model = load_model()
-    corpus_embeddings = load_corpus_embeddings()
-    query_embedding = model.encode(
-        query,
-        convert_to_tensor=True,
-        normalize_embeddings=True,
-    )
-    eligible_embeddings = corpus_embeddings[eligible_indices]
-    scores = util.cos_sim(
-        query_embedding, eligible_embeddings
-    )[0]
-    top = scores.topk(
-        k=min(top_k, len(eligible_indices))
-    )
-\end{verbatim}
-\end{screen}
+\VerbatimInput[
+  fontsize=\scriptsize,
+  formatcom=\fontspec{Segoe UI Symbol},
+  breaklines=true,
+  breakanywhere=true,
+  numbers=left,
+  numbersep=6pt
+]{app.py}
 
 \section{評価結果の生データ}
 \begin{center}
